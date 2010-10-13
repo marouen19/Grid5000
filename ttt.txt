@@ -1,0 +1,10 @@
+User jo=new User("josef", 4, 4, 3, 0, 0, 2, 0, 2);
+		User ad=new User("adrien", 5, 3, 4, 3, 0, 4, 1, 3);
+		User nis=new User("nishal", 5, 4, 2, 0, 0, 0, 0, 3);
+		User ma=new User("marouen", 1, 2, 2, 0, 3, 0, 4, 4);
+		User co=new User("colin", 4, 4, 3, 4, 0, 4, 2, 4);
+		User nic=new User("niclas", 2, 0, 2, 0, 0, 3, 2, 0);
+		User ro=new User("romain", 4, 1, 2, 0, 0, 2, 3, 1);
+		User ol=new User("olivier", 3, 0, 0, 0, 0, 0, 0, 1);
+		User im=new User("imré", 4, 3, 5, 0, 0, 1, 0, 5);
+		User sy=new User("sylvain", 3, 4, 3, 0, 0, 1, 0, 1);
