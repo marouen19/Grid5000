@@ -7,7 +7,7 @@ Wed Oct 13, 2010, 3:31PM:
 		-github created: http://github.com/marouen19/Grid5000
 	Tasks completed:
 		-API main practice tutorial
-
+		-SSH configured for free navigation between grid5000 frontends
 
 Notes:
 the ultimate goal from trying "ndoes=BEST" on the API is to book all the available resources, in a following experiment we will try to book the resources and deploy a system on them.
