@@ -12,3 +12,4 @@ Wed Oct 13, 2010:
 Notes:
 the ultimate goal from trying "ndoes=BEST" on the API is to book all the available resources, in a following experiment we will try to book the resources and deploy a system on them.
 
+ssh bridge doesn't persist. asks me for password after a couple of connexions..
