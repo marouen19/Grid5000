@@ -1,0 +1,14 @@
+Wed Oct 13, 2010, 3:31PM:
+	New Objectives:
+		-Configure SSH keys inside Grid5000.
+		-Try "nodes=BEST" method from oarsub through the API
+		-Create a repository on github
+	Reached Objectives:
+		-github created: http://github.com/marouen19/Grid5000
+	Tasks completed:
+		-API main practice tutorial
+
+
+Notes:
+the ultimate goal from trying "ndoes=BEST" on the API is to book all the available resources, in a following experiment we will try to book the resources and deploy a system on them.
+
