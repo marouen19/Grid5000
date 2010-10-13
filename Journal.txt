@@ -1,4 +1,4 @@
-Wed Oct 13, 2010, 3:31PM:
+Wed Oct 13, 2010:
 	New Objectives:
 		-Configure SSH keys inside Grid5000.
 		-Try "nodes=BEST" method from oarsub through the API
