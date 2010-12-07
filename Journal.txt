@@ -13,3 +13,12 @@ Notes:
 the ultimate goal from trying "ndoes=BEST" on the API is to book all the available resources, in a following experiment we will try to book the resources and deploy a system on them.
 
 ssh bridge doesn't persist. asks me for password after a couple of connexions..
+
+Tue Dec 07, 2010:
+	New Objectives:
+		-Merge persite and percluster scripts to create one script 			that creates a job, deploys on all nodes, one deployment per 			site. Then deletes the deployments, then deploys on all  			nodes, one deployment per cluster per site.
+		-Compare deployment times when done per site and when done   			per cluster per site.
+		-Trace graphs.
+		-After deployment is done, execute commands using Taktuk.
+	Reached Objectives:
+		-Fixed SSH issue.
