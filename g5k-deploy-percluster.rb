@@ -6,9 +6,9 @@ require 'pp'
 require 'yaml'
 
 config       = YAML.load_file(File.expand_path("~/.restclient"))['grid5000']
-public_key   = Dir[File.expand_path("~/.ssh/*.pub")][0] 
-fail "No public key available in ~/.ssh !" unless public_key
-private_key  = File.expand_path("~/.ssh/#{File.basename(public_key, ".pub")}")
+public_key   = Dir[File.expand_path("/root/.ssh/*.pub")][0] 
+fail "No public key available in /root/.ssh !" unless public_key
+private_key  = File.expand_path("/root/.ssh/#{File.basename(public_key, ".pub")}")
 fail "No private key corresponding to the public key available in ~/.ssh !" unless File.exist?(private_key)
 logger       = Logger.new(STDERR)
 logger.level = Logger::INFO
@@ -40,7 +40,7 @@ temp=Hash.new
 results= Hash.new
   Restfully::Session.new(:base_uri => config['url']+'/sid/grid5000', :logger => logger, :username => config['username'], :password => config['password']) do |root, session|
     root.sites.each do |site|
-	    next if %w{sophia orsay}.include?(site['uid']) # to limit the experiment's range
+	    next if %w{}.include?(site['uid']) # to limit the experiment's range
 
       free_nodes = site.status.inject(0) {|memo, node_status| memo+=((node_status['system_state'] == 'free' && node_status['hardware_state'] == 'alive') ? 1 : 0)}
       if free_nodes > 1
@@ -78,10 +78,15 @@ results= Hash.new
        Submitting deployment on #{cluster_id} nodes...
        "
        deployments<<job.parent.deployments.submit(:environment => "lenny-x64-base", :nodes => job['assigned_nodes'], :key => File.read(public_key)) rescue nil
-       m=m+job['assigned_nodes'].length
+       puts "
+       #{job['assigned_nodes'].pretty_inspect}
+       
+       "
 }
+ m=m+job['assigned_nodes'].length
 puts "
 #{m} nodes are booked for the deployments...
+
 "
       end
     end  
