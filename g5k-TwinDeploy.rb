@@ -48,7 +48,7 @@ results_m=Hash.new
 
 #Job Creation
     root.sites.each do |site|
-	    next if %w{lyon sophia rennes}.include?(site['uid']) # to limit the experiment's range
+	    next if %w{}.include?(site['uid']) # to limit the experiment's range
 
       free_nodes = site.status.inject(0) {|memo, node_status| memo+=((node_status['system_state'] == 'free' && node_status['hardware_state'] == 'alive') ? 1 : 0)}
       if free_nodes > 1
@@ -74,13 +74,17 @@ results_m=Hash.new
     begin
       Timeout.timeout(60*15) do
         until jobs.all?{|job| job['state'] == 'running'} do
-          session.logger.info "Some jobs are not running. Waiting 10 seconds before checking again..."
+          session.logger.info "
+	  Some jobs are not running. Waiting 10 seconds before checking again...
+	  "
           sleep 10
           jobs.each{|job| job.reload}
         end
       end
     rescue Timeout::Error => e
-      session.logger.warn "One of the jobs is still not running: #{jobs.inspect}. Will be deleted..."
+      session.logger.warn "
+      One of the jobs is still not running: #{jobs.inspect}. Will be deleted...
+      "
     end
 #END time out loop
 
@@ -116,27 +120,30 @@ results_m=Hash.new
     begin
       Timeout.timeout(60*15) do # wait at most 15mins
         until deployments.all?{|deployment| deployment['status'] == 'terminated'} do
-          logger.info "Some deployments are not terminated. Waiting 50 seconds before checking again..."
-          sleep 50
+          logger.info "
+	  Some deployments are not terminated. Waiting 30 seconds before checking again...
+	  "
+          sleep 30
           deployments.each{|deployment| deployment.reload
       if deployment['status']=='terminated'
 	      deployment['result'].each_key{|key| results_m.store(key, deployment['result']["#{key}"]['state'])}
 	      puts "
-	      Deployment on #{deployment['site_uid'] }'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
+	      
+	      #{Time.new.strftime("%H:%M:%S")} Deployment on #{deployment['site_uid'] }'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
 	      "
 	      
          
       else 
-	      puts "
-	      Waiting for the deployment on #{deployment['site_uid'] }'s #{deployment["nodes"].length} assigned nodes to be terminated...
-	      "
+	      puts "Waiting for the deployment on #{deployment['site_uid'] }'s #{deployment["nodes"].length} assigned nodes to be terminated..."
       
       end
 	}
 	end
       end
     rescue Timeout::Error => e
-      session.logger.warn "One of the deployments is still not terminated: it Will be deleted..."
+      session.logger.warn "
+      One of the deployments is still not terminated: it Will be deleted...
+      "
     end
 #END timeout loop
 
@@ -161,13 +168,17 @@ puts "
     begin
       Timeout.timeout(60*15) do
         until jobs.all?{|job| job['state'] == 'running'} do
-          session.logger.info "Some jobs are not running. Waiting 10 seconds before checking again..."
+          session.logger.info "
+	  Some jobs are not running. Waiting 10 seconds before checking again...
+	  "
           sleep 10
           jobs.each{|job| job.reload}
         end
       end
     rescue Timeout::Error => e
-      session.logger.warn "One of the jobs is still not running: #{jobs.inspect}. Will be deleted..."
+      session.logger.warn "
+      One of the jobs is still not running: #{jobs.inspect}. Will be deleted...
+      "
     end
 #END time out loop
 
@@ -207,27 +218,30 @@ puts "
     begin
       Timeout.timeout(60*15) do # wait at most 15mins
         until deployments.all?{|deployment| deployment['status'] == 'terminated'} do
-          logger.info "Some deployments are not terminated. Waiting 50 seconds before checking again..."
-          sleep 50
+          logger.info "
+	  Some deployments are not terminated. Waiting 30 seconds before checking again...
+	  "
+          sleep 30
           deployments.each{|deployment| deployment.reload
       if deployment['status']=='terminated'
 	      deployment['result'].each_key{|key| results_n.store(key, deployment['result']["#{key}"]['state'])}
 	      puts "
-	      Deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
+	      
+	      #{Time.new.strftime("%H:%M:%S")} Deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
 	      "
 	      
          
       else 
-	      puts "
-	      Waiting for the deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes to be terminated...
-	      "
+	      puts "Waiting for the deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes to be terminated..."
       # puts "OK: #{deployment.pretty_inspect}"
       end
 	}
 	end
       end
     rescue Timeout::Error => e
-      session.logger.warn "One of the deployments is still not terminated: it Will be deleted..."
+      session.logger.warn "
+      One of the deployments is still not terminated: it Will be deleted...
+      "
     end
 #END time out loop.
 
