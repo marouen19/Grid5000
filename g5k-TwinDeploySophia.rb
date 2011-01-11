@@ -21,10 +21,6 @@ deployments  = []
 # Procedure called when exiting on error
 extinction   = Proc.new{
   puts "Received extinction request, killing all jobs and deployments..."
-  #if deployments.empty?
-	#  jobs.each{|job| job.delete}
-  #else
-  #deployments.each{|deployment| deployment.delete}
   jobs.each{|job| job.delete}
 }
 #END extinction
@@ -55,7 +51,7 @@ results_m=Hash.new
 
 #Job Creation
     root.sites.each do |site|
-	    next if %w{bordeaux grenoble lille lyon nancy orsay rennes sophia Toulouse}.include?(site['uid']) # to limit the experiment's range
+	    next if %w{bordeaux grenoble lille lyon nancy orsay rennes Sophia toulouse}.include?(site['uid']) # to limit the experiment's range
 
       free_nodes = site.status.inject(0) {|memo, node_status| memo+=((node_status['system_state'] == 'free' && node_status['hardware_state'] == 'alive') ? 1 : 0)}
       if free_nodes > 1
@@ -159,14 +155,10 @@ results_m=Hash.new
 
 #Delete first deployments
     m_message="FIRST DEPLOYMENT: ############ #{results_m.size} nodes deployed over #{m} initail deployment#########";
-    deployments.each do |deployment|
-	  #  puts "#{results_m.pretty_inspect}"
-	
-	    puts "
+    	  puts "
 	    #{m_message}
-	    "
-        deployment.delete
-	end
+	    " 
+	deployments.each{|deployment| deployment.delete}
 #END delete first deployments
 puts "
 	Sleeping for 2 minutes
@@ -228,7 +220,7 @@ puts "
 	      
 	      #{Time.new.strftime("%H:%M:%S")} Deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
 	      "
-	SecondTimes.store("#{deployment["nodes"].first.split("-")[0] } #{Time.new.strftime("%H:%M:%S")}",Time.now-StartTime);
+	      if !SecondTimes.has_key?(deployment["nodes"].first.split("-")[0]) then SecondTimes.store(deployment["nodes"].first.split("-")[0],Time.now-StartTime) end
          
       else 
 	      puts "Waiting for the deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes to be terminated..."
@@ -246,9 +238,6 @@ puts "
 
 #Delete second deployments
 n_message="SECOND DEPLOYMENT: ############ #{results_n.size} nodes deployed over #{n} initail deployment#########";
-	    puts "
-		#{n_message}
-		"
 #END delete second deployments
 
 puts "
@@ -259,11 +248,12 @@ puts "
 
 #{SecondTimes.pretty_inspect}
 "
-        logger.warn "Test Ended, exiting..."
-      extinction.call
 end
 rescue StandardError => e
   puts "Catched unexpected exception #{e.class.name}: #{e.message} - #{e.backtrace.join("\n")}"
   extinction.call
   exit(1)
 end
+logger.warn "Test Ended, exiting..."
+extinction.call
+
