@@ -21,12 +21,11 @@ deployments  = []
 # Procedure called when exiting on error
 extinction   = Proc.new{
   puts "Received extinction request, killing all jobs and deployments..."
-  if deployments.empty?
-	  jobs.each{|job| job.delete}
-  else
-  deployments.each{|deployment| deployment.delete}
+  #if deployments.empty?
+	#  jobs.each{|job| job.delete}
+  #else
+  #deployments.each{|deployment| deployment.delete}
   jobs.each{|job| job.delete}
-  end
 }
 #END extinction
 
@@ -40,7 +39,11 @@ end
 #END trap
 
 #main class
+
 begin
+StartTime=Time.now;
+FirstTimes={};
+SecondTimes={};
 n=0
 m=0
 n_message='empty';
@@ -52,13 +55,14 @@ results_m=Hash.new
 
 #Job Creation
     root.sites.each do |site|
-	    next if %w{bordeaux grenoble lille lyon nancy orsay rennes Sophia toulouse}.include?(site['uid']) # to limit the experiment's range
+	    next if %w{bordeaux grenoble lille lyon nancy orsay rennes sophia Toulouse}.include?(site['uid']) # to limit the experiment's range
 
       free_nodes = site.status.inject(0) {|memo, node_status| memo+=((node_status['system_state'] == 'free' && node_status['hardware_state'] == 'alive') ? 1 : 0)}
       if free_nodes > 1
-	#needed_nodes= (free_nodes/1.2).floor
-        needed_nodes= "BEST"
-	jobs << site.jobs.submit(:resources => "nodes=#{needed_nodes},walltime=00:30:00", :command => "sleep 1800", :types => ["deploy"], :name => "Grid Large Scale experiment") rescue nil
+	needed_nodes= (free_nodes*0.8).floor
+        #needed_nodes= "BEST"
+	jobs << site.jobs.submit(:resources => "nodes=#{needed_nodes},walltime=00:30:00", :queue => "testing", :command => "sleep 1800", :types => ["deploy"], :name => "Grid Large Scale experiment") rescue nil
+      
       else
         session.logger.info "Skipped #{site['uid']}. Not enough free nodes."
       end
@@ -98,6 +102,7 @@ results_m=Hash.new
         job.delete
       else
 	       deployments << job.parent.deployments.submit(:environment => "lenny-x64-base", :nodes => job['assigned_nodes'], :key => File.read(public_key)) rescue nil
+		StartTime=Time.now;
 		k=job['assigned_nodes'].length
 		m=m+k
 	puts "ASSIGNED NODES:
@@ -135,7 +140,8 @@ results_m=Hash.new
 	      
 	      #{Time.new.strftime("%H:%M:%S")} Deployment on #{deployment['site_uid'] }'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
 	      "
-	      
+	      FirstTimes.store("#{deployment['site_uid'] } #{Time.new.strftime("%H:%M:%S")}",Time.now-StartTime);
+
          
       else 
 	      puts "Waiting for the deployment on #{deployment['site_uid'] }'s #{deployment["nodes"].length} assigned nodes to be terminated..."
@@ -168,23 +174,9 @@ puts "
 "
  sleep 120
  deployments  = []
-#start time out loop
-    begin
-      Timeout.timeout(60*10) do
-        until jobs.all?{|job| job['state'] == 'running'} do
-          session.logger.info "
-	  Some jobs are not running. Waiting 5 seconds before checking again...
-	  "
-          sleep 5
-          jobs.each{|job| job.reload}
-        end
-      end
-    rescue Timeout::Error => e
-      session.logger.warn "
-      One of the jobs is still not running: #{jobs.inspect}. Will be deleted...
-      "
-    end
-#END time out loop
+#start job time out loop
+
+#END job time out loop
 
 #Deploy image if job running
     jobs.each do |job|
@@ -196,7 +188,7 @@ puts "
        Submitting deployment on #{cluster_id} nodes...
        "
        deployments<<job.parent.deployments.submit(:environment => "lenny-x64-base", :nodes => nodes, :key => File.read(public_key)) rescue nil
-	
+	StartTime=Time.now;
 	k=nodes.length
 	n=n+k
 	puts "ASSIGNED NODES:
@@ -236,7 +228,7 @@ puts "
 	      
 	      #{Time.new.strftime("%H:%M:%S")} Deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes is terminated!!!!
 	      "
-	      
+	SecondTimes.store("#{deployment["nodes"].first.split("-")[0] } #{Time.new.strftime("%H:%M:%S")}",Time.now-StartTime);
          
       else 
 	      puts "Waiting for the deployment on #{deployment["nodes"].first.split("-")[0]}'s #{deployment["nodes"].length} assigned nodes to be terminated..."
@@ -254,19 +246,21 @@ puts "
 
 #Delete second deployments
 n_message="SECOND DEPLOYMENT: ############ #{results_n.size} nodes deployed over #{n} initail deployment#########";
-    deployments.each do |deployment|
-	  #  puts "#{results_n.pretty_inspect}"
 	    puts "
 		#{n_message}
 		"
-        deployment.delete
-	end
 #END delete second deployments
 
 puts "
 #{m_message}
 #{n_message}
+
+#{FirstTimes.pretty_inspect}
+
+#{SecondTimes.pretty_inspect}
 "
+        logger.warn "Test Ended, exiting..."
+      extinction.call
 end
 rescue StandardError => e
   puts "Catched unexpected exception #{e.class.name}: #{e.message} - #{e.backtrace.join("\n")}"
